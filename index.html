@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Resume Analyzer</h1>
+
+    <input type="file" id="resumeInput" accept=".pdf,.txt">
+
+    <select id="jobRole">
+        <option value="">Select Job Role</option>
+        <option value="Frontend Developer">Frontend Developer</option>
+        <option value="Backend Developer">Backend Developer</option>
+        <option value="Data Analyst">Data Analyst</option>
+    </select>
+
+    <button onclick="analyzeResume()">Analyze Resume</button>
+    <div id="output"></div>
+    <canvas id="skillChart"></canvas>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
