@@ -1,28 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Resume Analyzer</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Compare resume skills against a selected job role and get practical improvement suggestions.">
+  <title>ResumeLens — Resume Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-<div class="container">
-    <h1>Resume Analyzer</h1>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="ResumeLens home">
+      <span class="brand-mark">R</span>
+      <span>Resume<span class="brand-light">Analyzer</span></span>
+    </a>
+    <span class="topbar-note"><span class="status-dot"></span> Private, browser-based analysis</span>
+  </header>
 
-    <input type="file" id="resumeInput" accept=".pdf,.txt">
+  <main class="page-shell">
+    <section class="hero">
+      <div class="eyebrow"><span class="eyebrow-line"></span> YOUR NEXT OPPORTUNITY STARTS HERE</div>
+      <h1>Make your resume<br><span>work harder for you.</span></h1>
+      <p class="hero-copy">Compare your resume with a target role, spot skill gaps, and get clear next steps before you apply.</p>
+    </section>
 
-    <select id="jobRole">
-        <option value="">Select Job Role</option>
-        <option value="Frontend Developer">Frontend Developer</option>
-        <option value="Backend Developer">Backend Developer</option>
-        <option value="Data Analyst">Data Analyst</option>
-    </select>
+    <section class="workspace" aria-label="Resume analysis workspace">
+      <div class="panel upload-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="step-label">STEP 01</p>
+            <h2>Upload your resume</h2>
+          </div>
+          <span class="heading-icon" aria-hidden="true">↥</span>
+        </div>
 
-    <button onclick="analyzeResume()">Analyze Resume</button>
-    <div id="output"></div>
-    <canvas id="skillChart"></canvas>
-</div>
-<script src="script.js"></script>
+        <label class="dropzone" id="dropzone" for="resumeInput">
+          <input type="file" id="resumeInput" accept=".pdf,.txt,application/pdf,text/plain">
+          <span class="upload-icon" aria-hidden="true">↑</span>
+          <strong id="uploadTitle">Drop your resume here</strong>
+          <span class="dropzone-copy" id="uploadCopy">or <span class="browse-text">browse files</span> from your device</span>
+          <span class="file-note">PDF or TXT · Maximum 5 MB</span>
+        </label>
+        <div class="file-status" id="fileStatus" aria-live="polite">
+          <span class="file-status-icon">i</span>
+          <span>No file selected yet</span>
+        </div>
+
+        <div class="field-group">
+          <label for="jobRole">TARGET JOB ROLE</label>
+          <div class="select-wrap">
+            <select id="jobRole">
+              <option value="">Choose the role you're applying for</option>
+              <option value="Frontend Developer">Frontend Developer</option>
+              <option value="Backend Developer">Backend Developer</option>
+              <option value="Data Analyst">Data Analyst</option>
+              <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+              <option value="Database Engineer">Database Engineer</option>
+            </select>
+            <span aria-hidden="true">⌄</span>
+          </div>
+        </div>
+
+        <button class="primary-button" id="analyzeButton" type="button">
+          Analyze my resume <span aria-hidden="true">→</span>
+        </button>
+        <p class="privacy-note"><span aria-hidden="true">▣</span> Your file is processed in this browser and is not uploaded to a server.</p>
+        <div class="error-message" id="errorMessage" role="alert" hidden></div>
+      </div>
+
+      <aside class="side-panel">
+        <div class="side-panel-top">
+          <span class="sparkle" aria-hidden="true">✳</span>
+          <p class="side-kicker">A BETTER APPLICATION STARTS WITH CLARITY</p>
+        </div>
+        <h2>Know what to highlight.</h2>
+        <p class="side-copy">A quick check can help you tailor your resume to the role instead of sending the same version everywhere.</p>
+        <div class="benefit-list">
+          <div class="benefit"><span class="benefit-check">✓</span><div><strong>Skill match</strong><span>See which listed skills appear in your resume.</span></div></div>
+          <div class="benefit"><span class="benefit-check">✓</span><div><strong>Section check</strong><span>Review common resume sections at a glance.</span></div></div>
+          <div class="benefit"><span class="benefit-check">✓</span><div><strong>Actionable tips</strong><span>Get focused suggestions for your next edit.</span></div></div>
+        </div>
+        <div class="side-callout"><span aria-hidden="true">✦</span><p><strong>Small improvements add up.</strong><br>Use the results as a guide, not as a hiring prediction.</p></div>
+      </aside>
+    </section>
+
+    <section class="results-section" id="resultsSection" hidden aria-live="polite">
+      <div class="results-heading">
+        <div><p class="step-label">STEP 02</p><h2>Your resume snapshot</h2><p class="results-subtitle" id="resultsSubtitle"></p></div>
+        <button class="secondary-button" id="resetButton" type="button">Analyze another resume ↗</button>
+      </div>
+
+      <div class="summary-grid">
+        <article class="metric-card score-card">
+          <div class="metric-top"><span>ROLE SKILL MATCH</span><span class="metric-symbol">%</span></div>
+          <div class="score-row"><strong class="big-score" id="matchPercent">0%</strong><span class="score-caption" id="matchCaption">Skills found</span></div>
+          <div class="progress-track"><div class="progress-fill" id="matchProgress"></div></div>
+          <p class="metric-foot" id="matchFoot"></p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top"><span>SKILLS FOUND</span><span class="metric-symbol green">✓</span></div>
+          <strong class="metric-number" id="matchedCount">0</strong>
+          <p class="metric-foot">Required skills detected in the text</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top"><span>SKILLS TO REVIEW</span><span class="metric-symbol amber">＋</span></div>
+          <strong class="metric-number" id="missingCount">0</strong>
+          <p class="metric-foot">Consider adding them only if you have them</p>
+        </article>
+      </div>
+
+      <div class="results-grid">
+        <article class="panel result-panel">
+          <div class="result-panel-heading"><div><h3>Skill breakdown</h3><p>Based on keywords for your selected role</p></div></div>
+          <div class="chart-wrap"><canvas id="skillChart" role="img" aria-label="Chart showing matched and missing resume skills"></canvas></div>
+          <div class="chart-legend"><span><i class="legend-dot found"></i> Found in resume</span><span><i class="legend-dot missing"></i> Not detected</span></div>
+          <div class="skill-lists">
+            <div><h4><span class="list-dot found"></span> Skills found</h4><div class="chips" id="matchedSkills"></div></div>
+            <div><h4><span class="list-dot missing"></span> Skills to review</h4><div class="chips" id="missingSkills"></div></div>
+          </div>
+        </article>
+
+        <article class="panel result-panel">
+          <div class="result-panel-heading"><div><h3>Resume section check</h3><p>Common sections detected by keyword</p></div><span class="section-score" id="sectionScore">0/4</span></div>
+          <div class="section-list" id="sectionList"></div>
+          <div class="recommendations">
+            <div class="recommendation-heading"><span aria-hidden="true">✦</span><h3>Recommended next steps</h3></div>
+            <ul id="recommendationList"></ul>
+          </div>
+        </article>
+      </div>
+      <p class="disclaimer">Note: This is a lightweight keyword-based checker, not an ATS simulator or an AI hiring decision. It may miss synonyms and cannot judge the quality or truth of resume claims.</p>
+    </section>
+
+    <footer class="footer"><span>ResumeLens</span><span>Built to help you prepare with confidence.</span></footer>
+  </main>
 </body>
 </html>
