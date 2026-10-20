@@ -1,5 +1,8 @@
 #Resume Analyzer
 
+## 🌐 Live Demo
+Click here to try Resume Analyzer -> (https://arushipandey1509.github.io/Resume_Analyzer/)
+
 ResumeAnalyzer is a web-based application that helps users analyze their resumes by identifying matching and missing skills against a predefined list of required skills. It provides a simple visual summary of skill coverage and recommendations to help users identify areas for improvement.
 
 ## 🚀 Features
